@@ -21,7 +21,7 @@ def select_attributes(tr) -> dict:
         "nazev_obce": tr[1].get_text(),
     }
 
-def select_data(soup: bs) -> list:
+def select_data_municipality(soup: bs) -> list:
     """Return a list of numbers and names of municipalities.
     Parameters:
     - soup: bs object"""
@@ -31,6 +31,10 @@ def select_data(soup: bs) -> list:
         all_tr = table.find_all("tr")
         for tr in all_tr[3:]:
             results.append(select_attributes(tr.find_all("td")))
+    results = [
+        item for item in results
+        if any(value != "-" for value in item.values())
+        ]
     return results
 
 
@@ -39,7 +43,7 @@ def select_data(soup: bs) -> list:
 def main():
     url = "https://volby.cz/pls/ps2017nss/ps32?xjazyk=CZ&xkraj=2&xnumnuts=2102"
     soup = scrape_page(url)
-    results = select_data(soup)
+    results = select_data_municipality(soup)
     
     print(results)
     # save_to_csv(results, output_file)
