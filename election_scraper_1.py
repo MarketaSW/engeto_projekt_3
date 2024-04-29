@@ -37,15 +37,39 @@ def select_data_municipality(soup: bs) -> list:
         ]
     return results
 
+def get_subpage_url(soup) -> list:
+    """Returns a list of strings with subpage url addresses.
+    Parameters:
+    - soup: bs object with url addresses"""
+
+    subpages = list()
+    tds = soup.find_all("td", {"class": "cislo"})
+    for td in tds:
+        for link in td.children:
+            subpages.append(link['href'])
+    return subpages              
+                
+
+
+def scrape_subpage(subpage_url) -> bs:
+    #url -> find all hrefs -> for href in hrefs: scrape_page(href)
+    """Scrape all links from given bs4 object.
+    Parameters:
+    - soup: bs object"""
+   
+
 
 
 
 def main():
     url = "https://volby.cz/pls/ps2017nss/ps32?xjazyk=CZ&xkraj=2&xnumnuts=2102"
     soup = scrape_page(url)
+    subpage_url = get_subpage_url(soup)
+    subpage_soup = scrape_subpage(soup)
     results = select_data_municipality(soup)
     
     print(results)
+    print(subpage_url)
     # save_to_csv(results, output_file)
 
 if __name__ == "__main__":
