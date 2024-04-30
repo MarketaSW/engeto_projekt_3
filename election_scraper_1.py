@@ -21,7 +21,7 @@ def select_attributes(tr) -> dict:
         "nazev_obce": tr[1].get_text(),
     }
 
-def select_data_municipality(soup: bs) -> list:
+def select_data(soup: bs) -> list:
     """Return a list of numbers and names of municipalities.
     Parameters:
     - soup: bs object"""
@@ -36,40 +36,42 @@ def select_data_municipality(soup: bs) -> list:
         if any(value != "-" for value in item.values())
         ]
     return results
-
-def get_subpage_url(soup) -> list:
+    
+def get_subpage_urls(url, soup) -> list:
     """Returns a list of strings with subpage url addresses.
     Parameters:
     - soup: bs object with url addresses"""
 
+    base_url = url[:url.rfind("/")]
     subpages = list()
     tds = soup.find_all("td", {"class": "cislo"})
     for td in tds:
-        for link in td.children:
-            subpages.append(link['href'])
-    return subpages              
-                
+        for link in td.find_all("a", href=True):
+            full_url = base_url + "/" + link['href']
+            subpages.append(full_url)
+    return subpages         
 
-
-def scrape_subpage(subpage_url) -> bs:
-    #url -> find all hrefs -> for href in hrefs: scrape_page(href)
-    """Scrape all links from given bs4 object.
+def scrape_subpage(subpages) -> bs:
+    """Scrape all links from given list.
     Parameters:
-    - soup: bs object"""
-   
+    - subpage_urls: list of url links to scrape"""
 
+    subpage_soup = list()
+    for url in subpages:
+        subpage_soup.append(scrape_page(url))
+    return subpage_soup    
+        
+ 
 
 
 
 def main():
-    url = "https://volby.cz/pls/ps2017nss/ps32?xjazyk=CZ&xkraj=2&xnumnuts=2102"
+    url = "https://www.volby.cz/pls/ps2017nss/ps32?xjazyk=CZ&xkraj=2&xnumnuts=2102"
     soup = scrape_page(url)
-    subpage_url = get_subpage_url(soup)
-    subpage_soup = scrape_subpage(soup)
-    results = select_data_municipality(soup)
-    
-    print(results)
-    print(subpage_url)
+    results = select_data(soup)
+    subpages = get_subpage_urls(url, soup)
+    subpage_soup = scrape_subpage(subpages)
+    subpage_results = select_data(subpage_soup)
     # save_to_csv(results, output_file)
 
 if __name__ == "__main__":
