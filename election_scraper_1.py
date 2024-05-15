@@ -1,3 +1,9 @@
+"""
+election_scraper_1.py: třetí projekt do Engeto Online Python Akademie
+author: Markéta Svěráková Wallo
+email: marketa.wallo@gmail.com
+discord: marketasverakova_37252
+"""
 import requests
 import csv
 from bs4 import BeautifulSoup as bs
@@ -87,7 +93,6 @@ def append_party_data(results: list, subpages: list) -> list:
             all_tr = table.find_all("tr")
             for tr in all_tr[2:]:
                 tds = tr.find_all("td")
-                print(tds)
                 party_name = tds[1].get_text()
                 votes = tds[2].get_text()
                 for location in results:
@@ -113,8 +118,8 @@ def write_to_csv(data, output_file):
 
 def main():
     url = "https://www.volby.cz/pls/ps2017nss/ps32?xjazyk=CZ&xkraj=2&xnumnuts=2102"
-    soup = scrape_page(url) #soup s obsahem district page
-    subpages = get_subpage_urls(url, soup) #list s linky na podstranky
+    soup = scrape_page(url)
+    subpages = get_subpage_urls(url, soup)
     district_results = get_district_data(soup)
     location_results = append_location_data(district_results, subpages)
     results = append_party_data(location_results, subpages)
