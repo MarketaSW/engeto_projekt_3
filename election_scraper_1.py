@@ -54,15 +54,15 @@ def get_subpage_urls(url: str, soup: bs) -> list:
             subpages.append(full_url)
     return subpages         
 
-def append_subpage_data(results: list, subpages: list) -> list:
-    """ Append data scraped from subpages to data from district page.
+def append_location_data(results: list, subpages: list) -> list:
+    """ Append location data scraped from subpages to data from district page.
     Registered voters, envelopes issued and valid votes from each location.
     Parameters:
     - results: a list of dictionaries with data from district page
     - subpages: a list with links to subpages of a district page"""
 
     for url in subpages:
-        code_from_url = url.split("=")[-2].split("&")[0]
+        code_from_url = url.split("xobec=")[1].split("&")[0]
         soup = scrape_page(url)
         for location in results:
             if location["code"] == code_from_url:
@@ -71,6 +71,29 @@ def append_subpage_data(results: list, subpages: list) -> list:
                 location["valid"] = soup.find(attrs={"headers": "sa6"}).get_text()
                 break
     return results        
+
+def append_party_data(results: list, subpages: list) -> list:
+    """ Append party data scraped from subpages to data from district page.
+   Name of each party and count of votes.
+    Parameters:
+    - results: a list of dictionaries with data from district page
+    - subpages: a list with links to subpages of a district page"""
+    
+    for url in subpages:
+        code_from_url = url.split("xobec=")[1].split("&")[0]
+        soup = scrape_page(url)
+        tables = soup.find_all("table", {"class": "table"})
+        for table in tables[1:]:
+            all_tr = table.find_all("tr")
+            for tr in all_tr[2:]:
+                tds = tr.find_all("td")
+                print(tds)
+                party_name = tds[1].get_text()
+                votes = tds[2].get_text()
+                for location in results:
+                    if location["code"] == code_from_url:
+                        location[party_name] = votes
+    return results
 
 def write_to_csv(data, output_file):
     """Write the selected data to a CSV file.
@@ -92,8 +115,9 @@ def main():
     url = "https://www.volby.cz/pls/ps2017nss/ps32?xjazyk=CZ&xkraj=2&xnumnuts=2102"
     soup = scrape_page(url) #soup s obsahem district page
     subpages = get_subpage_urls(url, soup) #list s linky na podstranky
-    d_results = get_district_data(soup)
-    results = append_subpage_data(d_results, subpages)
+    district_results = get_district_data(soup)
+    location_results = append_location_data(district_results, subpages)
+    results = append_party_data(location_results, subpages)
     write_to_csv(results, "selected_data.csv")
    
 
