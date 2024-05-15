@@ -6,6 +6,7 @@ discord: marketasverakova_37252
 """
 import requests
 import csv
+import argparse
 from bs4 import BeautifulSoup as bs
 from pathlib import Path
 
@@ -107,23 +108,22 @@ def write_to_csv(data, output_file):
     - output_file: name of the CSV file to create."""
     path = Path(output_file)
     with path.open('w', newline='', encoding='utf-8') as csvfile:
-        writer = csv.writer(csvfile)
-        writer.writerow(data[0].keys())
-        for item in data:
-            writer.writerow(item.values())
-
-
-
-
+        writer = csv.DictWriter(csvfile, fieldnames=data[0].keys())
+        writer.writeheader()
+        writer.writerows(data)
 
 def main():
-    url = "https://www.volby.cz/pls/ps2017nss/ps32?xjazyk=CZ&xkraj=2&xnumnuts=2102"
-    soup = scrape_page(url)
-    subpages = get_subpage_urls(url, soup)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("url", type=str, help="url address")
+    parser.add_argument("output_file", type=str, help="output CSV file name")
+    args = parser.parse_args()
+
+    soup = scrape_page(args.url)
+    subpages = get_subpage_urls(args.url, soup)
     district_results = get_district_data(soup)
     location_results = append_location_data(district_results, subpages)
     results = append_party_data(location_results, subpages)
-    write_to_csv(results, "selected_data.csv")
+    write_to_csv(results, args.output_file)
    
 
 if __name__ == "__main__":
