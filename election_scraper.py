@@ -119,7 +119,7 @@ def main():
     parser.add_argument("output_file", type=str, help="output CSV file name")
     args = parser.parse_args()
 
-    print(f"Downloading data from given URL: {args.url}")
+    print(f"Downloading data from URL: {args.url}")
     soup = scrape_page(args.url)
     subpages = get_subpage_urls(args.url, soup)
     district_results = get_district_data(soup)
