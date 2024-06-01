@@ -4,6 +4,7 @@ author: Markéta Svěráková Wallo
 email: marketa.wallo@gmail.com
 discord: marketasverakova_37252
 """
+import sys
 import requests
 import csv
 import argparse
@@ -118,13 +119,17 @@ def main():
     parser.add_argument("output_file", type=str, help="output CSV file name")
     args = parser.parse_args()
 
+    print(f"Downloading data from given URL: {args.url}")
     soup = scrape_page(args.url)
     subpages = get_subpage_urls(args.url, soup)
     district_results = get_district_data(soup)
     location_results = append_location_data(district_results, subpages)
     results = append_party_data(location_results, subpages)
+
+    print(f"Saving to file: {args.output_file}")
     write_to_csv(results, args.output_file)
-   
+
+    sys.exit("Terminating the program.")
 
 if __name__ == "__main__":
     main()    
