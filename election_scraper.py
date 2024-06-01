@@ -1,5 +1,5 @@
 """
-election_scraper_1.py: třetí projekt do Engeto Online Python Akademie
+election_scraper.py: třetí projekt do Engeto Online Python Akademie
 author: Markéta Svěráková Wallo
 email: marketa.wallo@gmail.com
 discord: marketasverakova_37252
